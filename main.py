@@ -21,10 +21,17 @@ async def add_todo(username):
 async def get_todos(username):
     return quart.Response(response=json.dumps(_TODOS.get(username, [])), status=200)
 
-@app.delete("/todos/<string:username>")
-async def delete_todo(username):
+#@app.delete2("/todos/<string:username>")
+async def delete_todo2(username):
     request = await quart.request.get_json(force=True)
     todo_idx = request["todo_idx"]
+    # fail silently, it's a simple plugin
+    if 0 <= todo_idx < len(_TODOS[username]):
+        _TODOS[username].pop(todo_idx)
+    return quart.Response(response='OK', status=200)
+
+@app.delete("/todos/<string:username>/<int:todo_idx>")
+async def delete_todo(username, todo_idx):
     # fail silently, it's a simple plugin
     if 0 <= todo_idx < len(_TODOS[username]):
         _TODOS[username].pop(todo_idx)
@@ -50,7 +57,7 @@ async def openapi_spec():
         return quart.Response(text, mimetype="text/yaml")
 
 def main():
-    app.run(debug=True, host="0.0.0.0", port=5003)
+    app.run(debug=True, host="127.0.0.1", port=5003)
 
 if __name__ == "__main__":
     main()
